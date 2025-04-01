@@ -30,9 +30,13 @@ jobs:
           dnf download --source freerdp
           rpm -ivh freerdp-*.src.rpm
 
-      - name: Apply Custom Spec File
+      - name: Apply patches to spec file
         run: |
-          cp freerdp.spec ~/rpmbuild/SPECS/freerdp.spec
+          cd ~/rpmbuild/SPECS
+          cp $GITHUB_WORKSPACE/patches/SPECS/*.patch ~/rpmbuild/SPECS/
+          for patch in *.patch; do
+            patch -p1 < "$patch"
+          done
 
       - name: Install Build Dependencies
         run: |
