@@ -3,7 +3,7 @@
 # "--with=ffmpeg" to mock/rpmbuild; or by globally
 # setting these variables:
 # https://bugzilla.redhat.com/show_bug.cgi?id=2242028
-#global _with_ffmpeg 1
+%global _with_ffmpeg 1
 
 # Can be rebuilt with OpenCL support enabled by passing # "--with=opencl"
 # or by globally setting:
@@ -242,6 +242,7 @@ find . -name "*.c" -exec chmod 664 {} \;
     -DWITH_INTERNAL_RC4=ON \
     -DWITH_INTERNAL_MD4=ON \
     -DWITH_INTERNAL_MD5=ON \
+    -DCHANNEL_RDPECAM_CLIENT=ON \
 %ifarch x86_64
     -DWITH_SSE2=ON \
     -DWITH_VAAPI=%{?_with_ffmpeg:ON}%{?!_with_ffmpeg:OFF} \
