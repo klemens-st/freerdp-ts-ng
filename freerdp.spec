@@ -1,3 +1,4 @@
+
 # Can be rebuilt with FFmpeg support enabled by passing
 # "--with=ffmpeg" to mock/rpmbuild; or by globally
 # setting these variables:
@@ -28,9 +29,9 @@
 #global _with_webview 1
 
 Name:           freerdp
-Epoch:          2
+Epoch:          3
 Version:        3.12.0
-Release:        1%{?dist}
+Release:        1.ts7%{?dist}
 Summary:        Free implementation of the Remote Desktop Protocol (RDP)
 
 # The effective license is Apache-2.0 but:
@@ -238,6 +239,9 @@ find . -name "*.c" -exec chmod 664 {} \;
     -DWITH_XTEST=%{?_with_server:ON}%{?!_with_server:OFF} \
     -DWITH_XV=ON \
     -DWITH_ZLIB=ON \
+    -DWITH_INTERNAL_RC4=ON \
+    -DWITH_INTERNAL_MD4=ON \
+    -DWITH_INTERNAL_MD5=ON \
 %ifarch x86_64
     -DWITH_SSE2=ON \
     -DWITH_VAAPI=%{?_with_ffmpeg:ON}%{?!_with_ffmpeg:OFF} \
