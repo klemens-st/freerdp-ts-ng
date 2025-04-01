@@ -1,0 +1,83 @@
+name: Build & Deploy FreeRDP RPMs
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:  # Allows manual trigger
+
+jobs:
+  build-rpm:
+    runs-on: ubuntu-latest
+    container: fedora:41
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          dnf install -y rpm-build rpmdevtools createrepo_c
+          dnf install -y 'dnf-command(builddep)'
+
+      - name: Set up RPM build environment
+        run: |
+          rpmdev-setuptree
+
+      - name: Download Fedora's FreeRDP Source RPM
+        run: |
+          dnf download --source freerdp
+          rpm -ivh freerdp-*.src.rpm
+
+      - name: Apply Custom Spec File
+        run: |
+          cp freerdp.spec ~/rpmbuild/SPECS/freerdp.spec
+
+      - name: Install Build Dependencies
+        run: |
+          dnf builddep -y ~/rpmbuild/SPECS/freerdp.spec
+
+      - name: Build the RPM
+        run: |
+          rpmbuild -ba ~/rpmbuild/SPECS/freerdp.spec
+
+      - name: Prepare RPM Repository
+        run: |
+          mkdir -p repo
+          cp ~/rpmbuild/RPMS/**/*.rpm repo/
+          createrepo_c repo/
+
+      - name: Upload RPMs as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: freerdp-custom-rpm
+          path: repo/
+
+  deploy:
+    needs: build-rpm
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write  # Required for GitHub Pages deployment
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    
+    steps:
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Download Built RPMs
+        uses: actions/download-artifact@v4
+        with:
+          name: freerdp-custom-rpm
+          path: repo/
+
+      - name: Upload to GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: repo/
+
+      - name: Deploy GitHub Pages
+        uses: actions/deploy-pages@v4
